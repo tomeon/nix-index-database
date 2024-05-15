@@ -1,16 +1,11 @@
-{ lib, pkgs, config, databases, ... }:
+{ config, lib, pkgs, databases, ... }:
 
 let
-  nix-index-with-db = pkgs.callPackage ./nix-index-wrapper.nix {
-    nix-index-database = databases.${pkgs.stdenv.system}.database;
-  };
-  comma-with-db = pkgs.callPackage ./comma-wrapper.nix {
-    nix-index-database = databases.${pkgs.stdenv.system}.database;
-  };
+  common = import ./common.nix { inherit lib pkgs databases; };
 in
 
 {
-  options = {
+  options = lib.recursiveUpdate common.options {
     programs.nix-index.symlinkToCacheHome = lib.mkOption {
       type = lib.types.bool;
       default = config.programs.nix-index.enable;
@@ -19,20 +14,13 @@ in
         location used by nix-index. Useful for tools like comma.
       '';
     };
-    programs.nix-index-database.comma.enable = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = ''
-        Whether to wrap comma with nix-index-database and put it in the PATH.
-      '';
-    };
   };
   config = {
     programs.nix-index = {
       enable = lib.mkDefault true;
-      package = lib.mkDefault nix-index-with-db;
+      package = lib.mkDefault common.packages.nix-index-with-db;
     };
-    home.packages = lib.optional config.programs.nix-index-database.comma.enable comma-with-db;
+    home.packages = lib.optional config.programs.nix-index-database.comma.enable common.packages.comma-with-db;
 
     home.file."${config.xdg.cacheHome}/nix-index/files" =
       lib.mkIf config.programs.nix-index.symlinkToCacheHome

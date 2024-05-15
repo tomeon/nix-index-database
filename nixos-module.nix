@@ -1,26 +1,15 @@
-{ config, pkgs, lib, databases, ... }:
+{ config, lib, pkgs, databases, ... }:
 
 let
-  nix-index-with-db = pkgs.callPackage ./nix-index-wrapper.nix {
-    nix-index-database = databases.${pkgs.stdenv.system}.database;
-  };
-  comma-with-db = pkgs.callPackage ./comma-wrapper.nix {
-    nix-index-database = databases.${pkgs.stdenv.system}.database;
-  };
+  common = import ./common.nix { inherit lib pkgs databases; };
 in
 
 {
-  options = {
-    programs.nix-index-database.comma.enable = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = "Whether to wrap comma with nix-index-database and put it in the PATH.";
-    };
-  };
+  inherit (common) options;
 
   config = {
     programs.nix-index.enable = lib.mkDefault true;
-    programs.nix-index.package = lib.mkDefault nix-index-with-db;
-    environment.systemPackages = lib.optional config.programs.nix-index-database.comma.enable comma-with-db;
+    programs.nix-index.package = lib.mkDefault common.packages.nix-index-with-db;
+    environment.systemPackages = lib.optional config.programs.nix-index-database.comma.enable common.packages.comma-with-db;
   };
 }

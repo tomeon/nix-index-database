@@ -1,12 +1,10 @@
-{ pkgs, databases, ... }:
+{ lib, pkgs, databases, ... }:
 
 let
-  nix-index-with-db = pkgs.callPackage ./nix-index-wrapper.nix {
-    nix-index-database = databases.${pkgs.stdenv.system}.database;
-  };
+  common = import ./common.nix { inherit lib pkgs databases; };
 in
 
 {
   programs.nix-index.enable = true;
-  programs.nix-index.package = nix-index-with-db;
+  programs.nix-index.package = common.packages.nix-index-with-db;
 }
