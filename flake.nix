@@ -12,6 +12,16 @@
 
       databases = import ./packages.nix;
 
+      # From `hercules-ci/flake-parts`:
+      # https://github.com/hercules-ci/flake-parts/blob/e5d10a24b66c3ea8f150e47dfdb0416ab7c3390e/lib.nix#L216-L223
+      # Preserves the module location while permitting the use of
+      # "static"/"constructor" arguments (arguments that are not provided by
+      # the module system).
+      importApply = modulePath: staticArgs:
+        lib.setDefaultModuleLocation modulePath (import modulePath staticArgs);
+
+      importWithDatabases = lib.flip importApply { inherit databases; };
+
       mkPackages = pkgs: {
         nix-index-with-db =
           pkgs.callPackage ./nix-index-wrapper.nix {
@@ -35,18 +45,15 @@
       overlays.nix-index = final: prev: mkPackages final;
 
       darwinModules.nix-index = {
-        imports = [ ./darwin-module.nix ];
-        _module.args = { inherit databases; };
+        imports = [ (importWithDatabases ./darwin-module.nix) ];
       };
 
       hmModules.nix-index = {
-        imports = [ ./home-manager-module.nix ];
-        _module.args = { inherit databases; };
+        imports = [ (importWithDatabases ./home-manager-module.nix) ];
       };
 
       nixosModules.nix-index = {
-        imports = [ ./nixos-module.nix ];
-        _module.args = { inherit databases; };
+        imports = [ (importWithDatabases ./nixos-module.nix) ];
       };
 
       checks = lib.genAttrs testSystems (system:

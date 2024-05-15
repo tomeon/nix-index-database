@@ -1,4 +1,6 @@
-{ lib, pkgs, databases, ... }:
+{ databases }:
+
+{ lib, pkgs, ... }:
 
 let
   common = import ./common.nix { inherit lib pkgs databases; };
