@@ -3,7 +3,7 @@
 { config, lib, pkgs, ... }:
 
 let
-  common = import ./common.nix { inherit lib pkgs databases; };
+  common = import ./common.nix { inherit config lib pkgs databases; };
 in
 
 {
@@ -17,15 +17,19 @@ in
       '';
     };
   };
-  config = {
-    programs.nix-index = {
-      enable = lib.mkDefault true;
-      package = lib.mkDefault common.packages.nix-index-with-db;
-    };
-    home.packages = lib.optional config.programs.nix-index-database.comma.enable common.packages.comma-with-db;
+  config = lib.mkMerge [
+    common.config
 
-    home.file."${config.xdg.cacheHome}/nix-index/files" =
-      lib.mkIf config.programs.nix-index.symlinkToCacheHome
-        { source = databases.${pkgs.stdenv.system}.database; };
-  };
+    {
+      programs.nix-index = {
+        enable = lib.mkDefault true;
+        package = lib.mkDefault common.packages.nix-index-with-db;
+      };
+      home.packages = lib.optional config.programs.nix-index-database.comma.enable common.packages.comma-with-db;
+
+      home.file."${config.xdg.cacheHome}/nix-index/files" =
+        lib.mkIf config.programs.nix-index.symlinkToCacheHome
+          { source = databases.${pkgs.stdenv.system}.database; };
+    }
+  ];
 }
