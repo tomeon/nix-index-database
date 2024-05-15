@@ -3,6 +3,8 @@
 let
   inherit (lib) mkOption types;
 
+  cfg = config.programs.nix-index-database;
+
   databaseType = types.submodule ({ name, config, ... }: {
     freeformType = types.anything;
 
@@ -41,10 +43,10 @@ in
 {
   packages = {
     nix-index-with-db = pkgs.callPackage ./nix-index-wrapper.nix {
-      nix-index-database = config.programs.nix-index-database.databases.${pkgs.stdenv.system}.database;
+      nix-index-database = cfg.database;
     };
     comma-with-db = pkgs.callPackage ./comma-wrapper.nix {
-      nix-index-database = config.programs.nix-index-database.databases.${pkgs.stdenv.system}.database;
+      nix-index-database = cfg.database;
     };
   };
 
@@ -62,6 +64,14 @@ in
         description = ''
           Attribute set mapping system strings to `nix-index-database` database
           packages for the system in question.
+        '';
+      };
+
+      database = mkOption {
+        type = types.package;
+        default = cfg.databases.${pkgs.stdenv.system}.database;
+        description = ''
+          The `nix-index-database` database package.
         '';
       };
     };
