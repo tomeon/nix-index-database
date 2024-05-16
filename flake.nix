@@ -58,8 +58,7 @@
 
       checks = lib.genAttrs testSystems (system:
         import ./tests.nix {
-          inherit system nixpkgs;
-          nixIndexModule = self.nixosModules.nix-index;
+          inherit self system nixpkgs;
         }
       );
     };
