@@ -3,15 +3,14 @@
 { config, lib, pkgs, ... }:
 
 let
-  common = import ./common.nix { inherit config lib pkgs databases; };
+  common = import ./common.nix {
+    inherit config lib pkgs databases;
+    includeCommaOptions = false;
+  };
 in
 
 {
-  options = {
-    programs.nix-index-database = {
-      inherit (common.options.programs.nix-index-database) databases;
-    };
-  };
+  inherit (common) options;
 
   config = lib.mkMerge [
     common.config

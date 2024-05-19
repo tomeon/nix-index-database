@@ -1,4 +1,4 @@
-{ config, pkgs, lib, databases, ... }:
+{ config, pkgs, lib, databases, includeCommaOptions ? true }:
 
 let
   inherit (lib) mkOption types;
@@ -52,12 +52,6 @@ in
 
   options = {
     programs.nix-index-database = {
-      comma.enable = mkOption {
-        type = types.bool;
-        default = false;
-        description = "Whether to wrap comma with nix-index-database and put it in the PATH.";
-      };
-
       databases = mkOption {
         type = types.attrsOf databaseType;
         default = { };
@@ -73,6 +67,12 @@ in
         description = ''
           The `nix-index-database` database package.
         '';
+      };
+    } // lib.optionalAttrs includeCommaOptions {
+      comma.enable = mkOption {
+        type = types.bool;
+        default = false;
+        description = "Whether to wrap comma with nix-index-database and put it in the PATH.";
       };
     };
   };
