@@ -24,7 +24,7 @@
         in
         {
           run-darwin-test = pkgs.writers.writeBashBin "nix-index-database-run-darwin-test" ''
-            set -eux
+            set -eu
 
             if ! toplevel="$(${pkgs.gitMinimal}/bin/git rev-parse --show-toplevel --path-format=absolute 2>/dev/null)" || [[ -z "''${toplevel:-}" ]]; then
               toplevel="$(${pkgs.coreutils}/bin/readlink -f "''${PWD:-$(pwd -P)}/../..")"
@@ -42,7 +42,7 @@
             # > Please check there is nothing critical in these files, rename them by adding .before-nix-darwin to the end, and then try again.
             sudo mv -f /etc/nix/nix.conf{,.before-nix-darwin} || :
 
-            sudo ${nix-darwin.packages.${system}.darwin-rebuild}/bin/darwin-rebuild \
+            ${nix-darwin.packages.${system}.darwin-rebuild}/bin/darwin-rebuild \
               --override-input nix-index-database "$toplevel" \
               --override-input nixpkgs "$nixpkgs_url" \
               -L \
