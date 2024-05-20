@@ -57,7 +57,7 @@
             set -eu
 
             if (( "$#" < 1 )); then
-              set -- "''${BASH:-bash}" -c 'nix-locate --top-level --whole-name --at-root /bin/rg | cut -d" " -f1 | grep -F "ripgrep.out"'
+              set -- "''${BASH:-bash}" ${../nix-locate-rg-exe}
             fi
 
             "$@"

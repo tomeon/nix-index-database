@@ -54,11 +54,7 @@ in
 
         start_all()
 
-        cmd = " | ".join([
-          "nix-locate --top-level --whole-name --at-root '/bin/rg'",
-          "cut -d' ' -f1",
-          "grep -F 'ripgrep.out'"
-        ])
+        cmd = "${../nix-locate-rg-exe}"
 
         # Check that nix-locate works
         node1.succeed(cmd)
